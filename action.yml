@@ -1,0 +1,5 @@
+name: 'Github issues on Notion'
+description: 'Update Notion when there is a new Github issue or an update to it'
+runs:
+    using: 'node12'
+    main: 'dist/index.js'

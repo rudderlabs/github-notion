@@ -1,0 +1,22 @@
+{
+  "name": "github-notion",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx ncc build src/index.js  -o dist"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@actions/artifact": "^0.5.1",
+    "@actions/core": "^1.2.6",
+    "axios": "^0.21.1",
+    "i": "^0.3.6",
+    "npm": "^7.9.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.27.0"
+  }
+}
