@@ -5,7 +5,9 @@ const notionPageEndpoint = 'https://api.notion.com/v1/pages'
 
 async function createOrUpdateInNotion() {
   const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf-8"));
-  const respo = await createIssue(event)
+  console.log(JSON.stringify(event, null, 2))
+  event = event["issue"];
+  const respo = await createIssue(event);
 }
 
 async function createIssue(event) {
