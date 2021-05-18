@@ -4,7 +4,7 @@ const axios = require("axios");
 const notionPageEndpoint = 'https://api.notion.com/v1/pages'
 
 async function createOrUpdateInNotion() {
-  const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf-8"));
+  let event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf-8"));
   console.log(JSON.stringify(event, null, 2))
   event = event["issue"];
   const respo = await createIssue(event);
@@ -112,7 +112,7 @@ async function createIssue(event) {
 
   try {
     const resp = await axios.default.post(notionPageEndpoint, body, config);
-    console.log(resp)
+    console.log("Response", JSON.stringify(resp.data, null, 2))
     return resp
   } catch (e) {
     console.log(e)
