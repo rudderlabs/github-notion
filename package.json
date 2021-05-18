@@ -13,6 +13,7 @@
     "@actions/artifact": "^0.5.1",
     "@actions/core": "^1.2.6",
     "axios": "^0.21.1",
+    "fs": "0.0.1-security",
     "i": "^0.3.6",
     "npm": "^7.9.0"
   },
