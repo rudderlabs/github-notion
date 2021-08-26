@@ -1,7 +1,7 @@
 const core = require("@actions/core");
 const fs = require("fs");
 const axios = require("axios");
-const notionPageEndpoint = 'https://api.notion.com/v1/pages'
+const notionPageEndpoint = "https://api.notion.com/v1/pages";
 
 async function createOrUpdateInNotion() {
   let event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf-8"));
@@ -14,111 +14,125 @@ async function createIssue(event) {
   const token = core.getInput('token')
   const dbID = core.getInput('dbID')
   const config = {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   };
 
-  const body = 
-  {
-    "parent": {
-      "database_id": dbID
+  const body = {
+    parent: {
+      database_id: dbID,
     },
-    "properties": {
-      "PR": {
-          "type": "url",
-          "url": event.pull_request.html_url
-      },
+    properties: {
       "Issue Number": {
-          "type": "number",
-          "number": event.number
+        type: "number",
+        number: event.number,
       },
       "Issue URL": {
-          "type": "url",
-          "url": event.html_url
+        type: "url",
+        url: event.html_url,
       },
-      "User": {
-          "type": "select",
-          "select": {
-              "name": event.user.login
-          }
+      User: {
+        type: "select",
+        select: {
+          name: event.user.login,
+        },
       },
-      "Comments": {
-          "type": "number",
-          "number": event.comments
+      Comments: {
+        type: "number",
+        number: event.comments,
       },
-      "Assignees": {
-          "type": "multi_select",
-          "multi_select": event.assignees.map(a => { return {"name": a.login}})
+      State: {
+        type: "select",
+        select: {
+          name: event.state,
+        },
       },
-      "State": {
-          "type": "select",
-          "select": {
-              "name": event.state
-          }
+      event: {
+        type: "text",
+        text: {
+          content: JSON.stringify(event)
+        }
       },
-      "Created at": {
-          "type": "date",
-          "date": {
-              "start": event.created_at?event.created_at.replace("Z", "+00:00"):null
-          }
+      Title: {
+        id: "title",
+        type: "title",
+        title: [
+          {
+            type: "text",
+            text: {
+              content: event.title,
+            },
+            plain_text: event.title,
+          },
+        ],
       },
-      "Assignee": {
-          "type": "select",
-          "select": {
-              "name": event.assignee.login
-          }
-      },
-      "Title": {
-          "id": "title",
-          "type": "title",
-          "title": [
-              {
-                  "type": "text",
-                  "text": {
-                      "content": event.title
-                  },
-                  "plain_text": event.title
-              }
-          ]
-      }
-    }
-  }
+    },
+  };
 
-  if (event.closed_at) {
-    body["Closed at"] = {
-      "type": "date",
-      "date": {
-          "start": event.closed_at.replace("Z", "+00:00")
-      }
-    }
-  }
+  addToBody(body, event.closed_at, "Closed at", (param) => {
+    return {
+      type: "date",
+      date: {
+        start: param.replace("Z", "+00:00"),
+      },
+    };
+  });
 
-  if (event.updated_at) {
-    body["Updated at"] = {
-      "type": "date",
-      "date": {
-          "start": event.updated_at.replace("Z", "+00:00")
-      }
-    }
-  }
+  addToBody(body, event.updated_at, "Updated at", (param) => {
+    return {
+      type: "date",
+      date: {
+        start: param.replace("Z", "+00:00"),
+      },
+    };
+  });
 
-  if (event.created_at) {
-    body["Created at"] = {
-      "type": "date",
-      "date": {
-          "start": event.created_at.replace("Z", "+00:00")
-      }
-    }
-  }
+  addToBody(body, event.created_at, "Created at", (param) => {
+    return {
+      type: "date",
+      date: {
+        start: param.replace("Z", "+00:00"),
+      },
+    };
+  });
+
+  addToBody(body, event.pull_request, "PR", (param) => {
+    return {
+      type: "url",
+      url: param.html_url,
+    };
+  });
+
+  addToBody(body, event.assignees, "Assignees", (param) => {
+    return {
+      type: "multi_select",
+      multi_select: param.map((a) => {
+        return { name: a.login };
+      }),
+    };
+  });
+
+  addToBody(body, event.assignee, "Assignee", (param) => {
+    return {
+      type: "select",
+      select: {
+        name: param.login,
+      },
+    };
+  });
 
   try {
     const resp = await axios.default.post(notionPageEndpoint, body, config);
-    console.log("Response", JSON.stringify(resp.data, null, 2))
-    return resp
+    console.log("Response", JSON.stringify(resp.data, null, 2));
+    return resp;
   } catch (e) {
-    console.log(e)
+    console.log(e);
+  }
+}
+
+function addToBody(body, checkParam, key, f) {
+  if (checkParam) {
+    body.properties[key] = f(checkParam);
   }
 }
 
 createOrUpdateInNotion();
-
-

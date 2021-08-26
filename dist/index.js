@@ -3045,10 +3045,6 @@ async function createIssue(event) {
       "database_id": dbID
     },
     "properties": {
-      "PR": {
-          "type": "url",
-          "url": event.pull_request.html_url
-      },
       "Issue Number": {
           "type": "number",
           "number": event.number
@@ -3067,26 +3063,10 @@ async function createIssue(event) {
           "type": "number",
           "number": event.comments
       },
-      "Assignees": {
-          "type": "multi_select",
-          "multi_select": event.assignees.map(a => { return {"name": a.login}})
-      },
       "State": {
           "type": "select",
           "select": {
               "name": event.state
-          }
-      },
-      "Created at": {
-          "type": "date",
-          "date": {
-              "start": event.created_at?event.created_at.replace("Z", "+00:00"):null
-          }
-      },
-      "Assignee": {
-          "type": "select",
-          "select": {
-              "name": event.assignee.login
           }
       },
       "Title": {
@@ -3105,32 +3085,43 @@ async function createIssue(event) {
     }
   }
 
-  if (event.closed_at) {
-    body["Closed at"] = {
-      "type": "date",
-      "date": {
-          "start": event.closed_at.replace("Z", "+00:00")
-      }
+  addToBody(body, event.closed_at, "Closed at", (param)=>{ return {
+    "type": "date",
+    "date": {
+        "start": param.replace("Z", "+00:00")
     }
-  }
+  }})
+  
+  addToBody(body, event.updated_at, "Updated at", (param)=>{ return {
+    "type": "date",
+    "date": {
+        "start": param.replace("Z", "+00:00")
+    }
+  }})
 
-  if (event.updated_at) {
-    body["Updated at"] = {
-      "type": "date",
-      "date": {
-          "start": event.updated_at.replace("Z", "+00:00")
-      }
+  addToBody(body, event.created_at, "Created at", (param)=>{ return {
+    "type": "date",
+    "date": {
+        "start": param.replace("Z", "+00:00")
     }
-  }
+  }})
 
-  if (event.created_at) {
-    body["Created at"] = {
-      "type": "date",
-      "date": {
-          "start": event.created_at.replace("Z", "+00:00")
-      }
+  addToBody(body, event.pull_request, "PR", (param)=>{ return {
+    "type": "url",
+    "url": param.html_url
+  }})
+
+  addToBody(body, event.assignees, "Assignees", (param)=>{ return {
+    "type": "multi_select",
+    "multi_select": param.map(a => { return {"name": a.login}})
+  }})
+
+  addToBody(body, event.assignee, "Assignee", (param)=>{ return {
+    "type": "select",
+    "select": {
+        "name": param.login
     }
-  }
+  }})
 
   try {
     const resp = await axios.default.post(notionPageEndpoint, body, config);
@@ -3139,6 +3130,12 @@ async function createIssue(event) {
   } catch (e) {
     console.log(e)
   }
+}
+
+function addToBody(body, checkParam, key, f) {
+    if(checkParam) {
+      body.properties[key] = f(checkParam)
+    }
 }
 
 createOrUpdateInNotion();
