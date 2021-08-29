@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "env": 
+                {
+                    "INPUT_TOKEN" : "secret_hYczvYY4IUeXzwcAKwCpoZk3hSvZI5lS29xzFnjw7I7", 
+                    "INPUT_DBID":"160b858182d545199061198b5e3b9ca3",
+                    "GITHUB_EVENT_PATH": "/Users/shanmukh/workspace/github-notion/github-notion-action/src/event.json"
+                },
+            "program": "${workspaceFolder}/src/index.js"
+        }
+    ]
+}
